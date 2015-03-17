@@ -54,7 +54,7 @@ var hardConfig = {
 
 function initmap() {
 
-    var marker;
+    var marker, featureOverlay;
 
     // ----- pseudoclasses ------------------------------------------------------------------------------------
 
@@ -653,7 +653,9 @@ ol.extent.getTopRight(extent).reverse().join(" "),
         config.gfiok = false;
         config.gfiz = view.getZoom();
         var viewResolution = view.getResolution();
-
+        if (featureOverlay) {
+            featureOverlay.getFeatures().clear();
+        }
         marker.setPosition(config.gficoord);
         $('#marker').show();
         // recenter anime
@@ -758,6 +760,7 @@ ol.extent.getTopRight(extent).reverse().join(" "),
 
     function getCentroidAndExtent(geom) {
         var obj = {};
+        obj.type = geom.getType();
         switch (geom.getType()) {
             case 'Point':
                 obj.coordinates =  geom.getCoordinates();
@@ -872,6 +875,21 @@ ol.extent.getTopRight(extent).reverse().join(" "),
     };
     // enables search on features attributes
     function activateSearchFeatures(mode) {
+        // featureOverlay for feature highlight
+        var featureStyle = new ol.style.Style({
+            stroke: new ol.style.Stroke({
+              color: '#AF2019',
+              width: 1
+            }),
+            fill: new ol.style.Fill({
+              color: 'rgba(255, 255, 255, 0.2)'
+            })
+         });
+        featureOverlay = new ol.FeatureOverlay({map:map, style: featureStyle}); 
+        $("#panelLocate [role='button']").click(function(){
+            featureOverlay.getFeatures().clear();
+            $("#marker").hide();
+        });
         config.searchparams.mode = mode ;
         if (mode === 'remote') {
             var searchLayer = config.layersQueryable[config.layersQueryable.length -1];
@@ -926,6 +944,8 @@ ol.extent.getTopRight(extent).reverse().join(" "),
         var coordinates = data.location;
         var extent = data.extent;
         var zoom = parseInt(data.zoom);
+        var feature = new ol.Feature({ geometry: new ol.geom.Polygon.fromExtent(data.extent)});
+        featureOverlay.addFeature(feature);
         // test if extent is valid (with width and height - not a simple point)
         // invalidate extent if extent is not valid
         if (extent.length===4) {
@@ -942,7 +962,10 @@ ol.extent.getTopRight(extent).reverse().join(" "),
             view.setCenter(coordinates,map.getSize());
             view.setZoom(zoom || 16);
         }
-        $('#marker').show();
+        if (data.geomtype === 'Point') {
+            marker.setPosition(coordinates);
+            $('#marker').show();
+        }
     };
 
     function featuresToList (features) {
@@ -967,7 +990,8 @@ ol.extent.getTopRight(extent).reverse().join(" "),
                 .find("a")
                 .text(title.join(", "))
                 .attr("data-extent", '['+svgeometry.extent+']')
-                .attr("data-location", '['+svgeometry.extent+']')
+                .attr("data-geomtype", svgeometry.type)
+                .attr("data-location", '['+svgeometry.coordinates+']')
                 .click(function() {
                   onSearchItemClick($( this ));
                 })
