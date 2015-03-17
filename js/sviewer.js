@@ -965,6 +965,8 @@ ol.extent.getTopRight(extent).reverse().join(" "),
         if (data.geomtype === 'Point') {
             marker.setPosition(coordinates);
             $('#marker').show();
+        } else {
+            $('#marker').hide();
         }
     };
 
