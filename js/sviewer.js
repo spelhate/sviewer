@@ -879,7 +879,7 @@ ol.extent.getTopRight(extent).reverse().join(" "),
         var featureStyle = new ol.style.Style({
             stroke: new ol.style.Stroke({
               color: '#AF2019',
-              width: 1
+              width: 3
             }),
             fill: new ol.style.Fill({
               color: 'rgba(255, 255, 255, 0.2)'
