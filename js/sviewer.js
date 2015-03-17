@@ -944,6 +944,7 @@ ol.extent.getTopRight(extent).reverse().join(" "),
         var coordinates = data.location;
         var extent = data.extent;
         var zoom = parseInt(data.zoom);
+        featureOverlay.getFeatures().clear();
         var feature = new ol.Feature({ geometry: new ol.geom.Polygon.fromExtent(data.extent)});
         featureOverlay.addFeature(feature);
         // test if extent is valid (with width and height - not a simple point)
