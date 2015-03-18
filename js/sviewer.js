@@ -54,7 +54,7 @@ var hardConfig = {
 
 function initmap() {
 
-    var marker, featureOverlay;
+    var marker, featureOverlay, featureslist;
 
     // ----- pseudoclasses ------------------------------------------------------------------------------------
 
@@ -882,7 +882,7 @@ ol.extent.getTopRight(extent).reverse().join(" "),
               width: 3
             }),
             fill: new ol.style.Fill({
-              color: 'rgba(255, 255, 255, 0.2)'
+              color: 'rgba(0, 0, 0, 0.2)'
             })
          });
         featureOverlay = new ol.FeatureOverlay({map:map, style: featureStyle}); 
@@ -944,9 +944,17 @@ ol.extent.getTopRight(extent).reverse().join(" "),
         var coordinates = data.location;
         var extent = data.extent;
         var zoom = parseInt(data.zoom);
-        featureOverlay.getFeatures().clear();
-        var feature = new ol.Feature({ geometry: new ol.geom.Polygon.fromExtent(data.extent)});
-        featureOverlay.addFeature(feature);
+        if (featureOverlay) {
+            featureOverlay.getFeatures().clear();
+            var feature;
+            if (data.featureid) {
+                feature = featureslist[data.featureid];
+                featureOverlay.addFeature(feature);
+            } else {
+                //feature = new ol.Feature({ geometry: new ol.geom.Polygon.fromExtent(data.extent)}); 
+                //featureOverlay.addFeature(feature);
+            }            
+        }
         // test if extent is valid (with width and height - not a simple point)
         // invalidate extent if extent is not valid
         if (extent.length===4) {
@@ -972,9 +980,12 @@ ol.extent.getTopRight(extent).reverse().join(" "),
     };
 
     function featuresToList (features) {
+        featureslist = {};
         var lib = config.searchparams.title || 'Top layer';
         $("#searchResults").append('<li data-role="list-divider">'+lib+'</li>');
         for (var i = 0; i < features.length; ++i) {
+            var id = features[i].getId();
+            featureslist[id]= features[i];
             var geom = features[i].getGeometry();
             var svgeometry = getCentroidAndExtent(geom);
             var attributes = features[i].getProperties();
@@ -995,6 +1006,7 @@ ol.extent.getTopRight(extent).reverse().join(" "),
                 .attr("data-extent", '['+svgeometry.extent+']')
                 .attr("data-geomtype", svgeometry.type)
                 .attr("data-location", '['+svgeometry.coordinates+']')
+                .attr("data-featureid", id)
                 .click(function() {
                   onSearchItemClick($( this ));
                 })
