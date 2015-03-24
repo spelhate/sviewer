@@ -300,6 +300,26 @@ screen and (max-height: 400px) {
 .sv-feature a {
     font-size: 0.7em;
 }
+
+.sv-feature p {
+  font-size: 0.7em;
+  max-width: 250px;
+}
+
 .sv-location a {
     font-size: 0.7em;
+}
+
+.ui-li-static.ui-collapsible > .ui-collapsible-heading {
+    margin: 0;
+}
+.ui-li-static.ui-collapsible {
+    padding: 0;
+}
+.ui-li-static.ui-collapsible > .ui-collapsible-heading > .ui-btn {
+    border-top-width: 0;
+}
+.ui-li-static.ui-collapsible > .ui-collapsible-heading.ui-collapsible-heading-collapsed > .ui-btn,
+.ui-li-static.ui-collapsible > .ui-collapsible-content {
+    border-bottom-width: 0;
 }

@@ -555,7 +555,7 @@ function initmap() {
                                   onSearchItemClick($( this ));
                                 })
                                 .parent()
-                                .attr("title",resultElems.join('\n'));
+                                .attr("title",resultElems.join('\n'));                        
                         items.push(item);
                     }
                     $("#searchResults").prepend(items);
@@ -895,6 +895,7 @@ ol.extent.getTopRight(extent).reverse().join(" "),
             var searchLayer = config.layersQueryable[config.layersQueryable.length -1];
             if (searchLayer) {
                 config.searchparams.title = searchLayer.md.title;
+                config.searchparams.wmslayer = searchLayer.wmslayer;
                 // get DescribeLayer from last Layer
                 var describeLayerUrl = searchLayer.options.wmsurl_ns;
                 $.ajax({
@@ -949,6 +950,8 @@ ol.extent.getTopRight(extent).reverse().join(" "),
             var feature;
             if (data.featureid) {
                 feature = featureslist[data.featureid];
+                console.log(config.searchparams.wmslayer);
+                //Ajax GFI
                 featureOverlay.addFeature(feature);
             } else {
                 //feature = new ol.Feature({ geometry: new ol.geom.Polygon.fromExtent(data.extent)}); 
@@ -982,7 +985,7 @@ ol.extent.getTopRight(extent).reverse().join(" "),
     function featuresToList (features) {
         featureslist = {};
         var lib = config.searchparams.title || 'Top layer';
-        $("#searchResults").append('<li data-role="list-divider">'+lib+'</li>');
+        $("#searchResults").append('<li data-role="list-divider">'+lib+'</li><div data-role="collapsibleset" id="collapsible-set"></div>');
         for (var i = 0; i < features.length; ++i) {
             var id = features[i].getId();
             featureslist[id]= features[i];
@@ -998,10 +1001,9 @@ ol.extent.getTopRight(extent).reverse().join(" "),
                         title.push(val);
                     }
                 }
-            });
-
-            var item =$('<li class="sv-feature" data-icon="star"><a href="#"></a></li>')
-                .find("a")
+            });                
+            var item =$('<li class="sv-feature"  data-role="collapsible" data-inset="true" data-iconpos="right"><h4></h4><p>'+tips.join('\n')+'</p></li>')
+                .find("h4")
                 .text(title.join(", "))
                 .attr("data-extent", '['+svgeometry.extent+']')
                 .attr("data-geomtype", svgeometry.type)
@@ -1010,11 +1012,23 @@ ol.extent.getTopRight(extent).reverse().join(" "),
                 .click(function() {
                   onSearchItemClick($( this ));
                 })
-                .parent()
-                .attr("title",tips.join('\n'));
-            $("#searchResults").append(item);
+                .parent().collapsible();                
+                
+            
+            $("#collapsible-set").append(item).collapsibleset();
         }
         $("#searchResults").listview().listview('refresh');
+        //animate collapsible content
+        $("#collapsible-set .ui-collapsible-heading-toggle").on("click", function (e) { 
+            var current = $(this).closest(".ui-collapsible");             
+            if (current.hasClass("ui-collapsible-collapsed")) {
+                //collapse all others and then expand this one
+                $(".ui-collapsible").not(".ui-collapsible-collapsed").find(".ui-collapsible-heading-toggle").click();
+                $(".ui-collapsible-content", current).slideDown(300);
+            } else {
+                $(".ui-collapsible-content", current).slideUp(300);
+            }
+        });
     }
 
     // search form submit
