@@ -549,7 +549,7 @@ function initmap() {
                                 .find("a")
                                 .text(label)
                                 .attr("data-extent", '['+extent+']')
-                                .attr("data-location", '['+ptResult+']')
+                                .attr("data-center", '['+ptResult+']')
                                 .attr("data-zoom", zoom)
                                 .click(function() {
                                   onSearchItemClick($( this ));
@@ -876,15 +876,20 @@ ol.extent.getTopRight(extent).reverse().join(" "),
     // enables search on features attributes
     function activateSearchFeatures(mode) {
         // featureOverlay for feature highlight
-        var featureStyle = new ol.style.Style({
+        var featureStyle = [
+            new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                  color: '#FFFFFF',
+                  width: 8
+                })
+             }),
+            new ol.style.Style({
             stroke: new ol.style.Stroke({
               color: '#AF2019',
               width: 3
-            }),
-            fill: new ol.style.Fill({
-              color: 'rgba(0, 0, 0, 0.2)'
             })
-         });
+         }),
+         ];
         featureOverlay = new ol.FeatureOverlay({map:map, style: featureStyle}); 
         $("#panelLocate [role='button']").click(function(){
             featureOverlay.getFeatures().clear();
@@ -927,7 +932,6 @@ ol.extent.getTopRight(extent).reverse().join(" "),
                                     alert('error');
                                 }
                             });
-
                         },
                         failure: function() {
                             alert('error');
@@ -942,17 +946,45 @@ ol.extent.getTopRight(extent).reverse().join(" "),
 
     function onSearchItemClick (item) {
         var data = $(item).data();
-        var coordinates = data.location;
+        var coordinates = data.center;
         var extent = data.extent;
-        var zoom = parseInt(data.zoom);
-        if (featureOverlay) {
+        var zoom = parseInt(data.zoom);        
+        if (config.search && featureOverlay) {
             featureOverlay.getFeatures().clear();
             var feature;
             if (data.featureid) {
                 feature = featureslist[data.featureid];
-                console.log(config.searchparams.wmslayer);
-                //Ajax GFI
                 featureOverlay.addFeature(feature);
+                //get and show getFeatureInfo
+                var domResponse = item.parent().find('.ui-collapsible-content');
+                if (domResponse.children().length ===0 && config.searchparams.mode === "remote" ) {
+                    //Ajax getFeatureInfo with vendor parameter : featureid
+                    domResponse.text("GetFeatureInfo ...");
+                    var url = config.searchparams.wmslayer.getSource().getGetFeatureInfoUrl(
+                        data.firstcoordinate,
+                        view.getResolution(),
+                        projection,
+                        {'INFO_FORMAT': 'text/html'
+                        ,'FEATUREID': data.featureid} // does not work with postgis when there is no primarykey because geoserver generates random feature IDs
+                    );
+                    $.ajax({
+                        url: ajaxURL(url),
+                        type: 'GET',
+                        dataType: 'html',
+                        context: domResponse,
+                        success: function(response) {
+                            if (response.search('<!--nodatadetect-->\n<!--nodatadetect-->')<0 &&  response.search('<!--nodatadetect--><!--nodatadetect-->')<0){
+                                domResponse.text("");
+                                domResponse.append(response);
+                            } else {
+                                domResponse.text("");
+                                domResponse.append(this.parent().children().first().data().getfeature);
+                            }
+                        }
+                    });
+                } else if (domResponse.children().length ===0 && config.searchparams.mode === "local" ) { 
+                    domResponse.append(item.parent().children().first().data().getfeature);
+                }
             } else {
                 //feature = new ol.Feature({ geometry: new ol.geom.Polygon.fromExtent(data.extent)}); 
                 //featureOverlay.addFeature(feature);
@@ -968,6 +1000,16 @@ ol.extent.getTopRight(extent).reverse().join(" "),
             extent = false;
         }
         marker.setPosition(coordinates);
+        // zoom animation
+        var duration = 2000;
+        var start = +new Date();
+        var pan = ol.animation.pan({
+          duration: duration,
+          source: view.getCenter(),
+          start: start
+        });        
+        map.beforeRender(pan);
+        
         if (extent) {
             view.fitExtent(extent, map.getSize());
         } else {
@@ -990,6 +1032,7 @@ ol.extent.getTopRight(extent).reverse().join(" "),
             var id = features[i].getId();
             featureslist[id]= features[i];
             var geom = features[i].getGeometry();
+            var firstcoordinate = geom.getFirstCoordinate();
             var svgeometry = getCentroidAndExtent(geom);
             var attributes = features[i].getProperties();
             var tips = [];
@@ -1002,19 +1045,20 @@ ol.extent.getTopRight(extent).reverse().join(" "),
                     }
                 }
             });                
-            var item =$('<li class="sv-feature"  data-role="collapsible" data-inset="true" data-iconpos="right"><h4></h4><p>'+tips.join('\n')+'</p></li>')
+            var item =$('<li class="sv-feature"  data-role="collapsible" data-inset="true" data-iconpos="right"><h4></h4></li>')
                 .find("h4")
                 .text(title.join(", "))
                 .attr("data-extent", '['+svgeometry.extent+']')
                 .attr("data-geomtype", svgeometry.type)
-                .attr("data-location", '['+svgeometry.coordinates+']')
+                .attr("data-center", '['+svgeometry.coordinates+']')
                 .attr("data-featureid", id)
+                .attr("data-getfeature", '<p>'+tips.join('\n')+'</p>')
+                .attr("data-firstcoordinate", '['+firstcoordinate+']')
                 .click(function() {
                   onSearchItemClick($( this ));
                 })
                 .parent().collapsible();                
-                
-            
+              
             $("#collapsible-set").append(item).collapsibleset();
         }
         $("#searchResults").listview().listview('refresh');

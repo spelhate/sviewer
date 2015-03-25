@@ -302,12 +302,16 @@ screen and (max-height: 400px) {
 }
 
 .sv-feature p {
-  font-size: 0.7em;
-  max-width: 250px;
+  /*font-size: 0.7em;
+  max-width: 250px;*/
 }
 
 .sv-location a {
     font-size: 0.7em;
+}
+
+#collapsible-set {
+  margin-top: 0;
 }
 
 .ui-li-static.ui-collapsible > .ui-collapsible-heading {
@@ -322,4 +326,15 @@ screen and (max-height: 400px) {
 .ui-li-static.ui-collapsible > .ui-collapsible-heading.ui-collapsible-heading-collapsed > .ui-btn,
 .ui-li-static.ui-collapsible > .ui-collapsible-content {
     border-bottom-width: 0;
+}
+
+li.ui-li-divider.ui-bar-inherit.ui-last-child {
+  border-bottom-left-radius: 0px;
+  border-bottom-right-radius: 0px;
+  border-bottom-width: 0px;
+}
+
+li.sv-feature.ui-collapsible.ui-first-child {  
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;  
 }
