@@ -177,6 +177,8 @@ function initmap() {
                         self.md.title = mdLayer.Title;
                         if (config.search) {
                             config.searchparams.title = self.md.title;
+                            $("#addressInput").attr("placeholder", $("#addressInput").attr("placeholder") + ', ' + config.searchparams.title);
+                            $("#addressInput").attr("title", $("#addressInput").attr("title") + ', ' + config.searchparams.title);
                         }
 
                         // abstract
@@ -874,7 +876,7 @@ ol.extent.getTopRight(extent).reverse().join(" "),
         }
     };
     // enables search on features attributes
-    function activateSearchFeatures(mode) {
+    function activateSearchFeatures(mode) {        
         // featureOverlay for feature highlight
         var featureStyle = [
             new ol.style.Style({
@@ -899,7 +901,7 @@ ol.extent.getTopRight(extent).reverse().join(" "),
         if (mode === 'remote') {
             var searchLayer = config.layersQueryable[config.layersQueryable.length -1];
             if (searchLayer) {
-                config.searchparams.title = searchLayer.md.title;
+                config.searchparams.title = searchLayer.md.title;                
                 config.searchparams.wmslayer = searchLayer.wmslayer;
                 // get DescribeLayer from last Layer
                 var describeLayerUrl = searchLayer.options.wmsurl_ns;
@@ -959,7 +961,7 @@ ol.extent.getTopRight(extent).reverse().join(" "),
                 var domResponse = item.parent().find('.ui-collapsible-content');
                 if (domResponse.children().length ===0 && config.searchparams.mode === "remote" ) {
                     //Ajax getFeatureInfo with vendor parameter : featureid
-                    domResponse.text("GetFeatureInfo ...");
+                    domResponse.text(tr("searching..."));
                     var url = config.searchparams.wmslayer.getSource().getGetFeatureInfoUrl(
                         data.firstcoordinate,
                         view.getResolution(),
@@ -1286,7 +1288,9 @@ ol.extent.getTopRight(extent).reverse().join(" "),
             config.search = true;
             config.searchparams = {};
             config.searchparams.bboxfilter = true;
-            $("#addressForm label").text('Features or ' + $("#addressForm label").text())
+            //$("#addressForm label").text('Features or ' + $("#addressForm label").text());            
+            $("#addressForm label").text("");
+            config.searchparams.title
         }
     }
 

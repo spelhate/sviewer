@@ -123,11 +123,12 @@ $(document).bind("mobileinit", function(){
           <form id="addressForm" method="post" action="#">
             <label for="addressInput" class="i18n">Address and/or city</label>
             <div data-role="controlgroup" data-type="horizontal" class="ui-mini">
-                <input type="text"
+                <input type="text" class="i18n
                     name="addressInput"
                     id="addressInput"
                     data-wrapper-class="controlgroup-textinput ui-btn ui-mini"
                     value=""
+                    placeholder="Place"
                     title="Address and/or city" /><button class="i18n ui-btn ui-icon-search ui-btn-icon-notext " title="Locate">Locate</button>
             </div>
             <span id="locateMsg"></span>

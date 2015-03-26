@@ -338,3 +338,7 @@ li.sv-feature.ui-collapsible.ui-first-child {
   border-top-left-radius: 0px;
   border-top-right-radius: 0px;  
 }
+
+input[placeholder] { 
+    text-overflow: ellipsis;
+}
