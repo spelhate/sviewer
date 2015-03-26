@@ -1001,16 +1001,7 @@ ol.extent.getTopRight(extent).reverse().join(" "),
         } else {
             extent = false;
         }
-        marker.setPosition(coordinates);
-        // zoom animation
-        var duration = 2000;
-        var start = +new Date();
-        var pan = ol.animation.pan({
-          duration: duration,
-          source: view.getCenter(),
-          start: start
-        });        
-        map.beforeRender(pan);
+        marker.setPosition(coordinates);       
         
         if (extent) {
             view.fitExtent(extent, map.getSize());
@@ -1049,7 +1040,8 @@ ol.extent.getTopRight(extent).reverse().join(" "),
             });                
             var item =$('<li class="sv-feature"  data-role="collapsible" data-inset="true" data-iconpos="right"><h4></h4></li>')
                 .find("h4")
-                .text(title.join(", "))
+                //.text(title.join(", "))
+                .text(title[0])
                 .attr("data-extent", '['+svgeometry.extent+']')
                 .attr("data-geomtype", svgeometry.type)
                 .attr("data-center", '['+svgeometry.coordinates+']')
